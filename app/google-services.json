@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "181715702605",
+    "project_id": "gestion-de-residos",
+    "storage_bucket": "gestion-de-residos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181715702605:android:d0ac25b725e584c1191d04",
+        "android_client_info": {
+          "package_name": "com.example.gestinresiduos1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0l-DMRvlxFNtsBD7T-CPH7RcxCInNA28"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

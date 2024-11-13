@@ -1,0 +1,10 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.GestiónResiduos1" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#3AC77B</item>
+        <!-- Color de la barra de navegación -->
+        <item name="android:navigationBarColor">#3AC77B</item>
+    </style>
+
+    <style name="Theme.GestiónResiduos1" parent="Base.Theme.GestiónResiduos1" />
+</resources>

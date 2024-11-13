@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <!-- Título -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Opciones de notificación"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        android:textColor="#3DDB83"
+        android:layout_marginBottom="16dp" />
+
+
+
+    <!-- Botones de opciones -->
+    <Button
+        android:id="@+id/buttonDelay"
+        android:layout_width="317dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="#3DDB83"
+        android:text="Retrasos en la recolección"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/buttonChangeSchedule"
+        android:layout_width="317dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="#3DDB83"
+        android:text="Cambio de horario"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/buttonSuspendService"
+        android:layout_width="318dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="#3DDB83"
+        android:text="Suspensión del servicio"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/buttonModifyWaste"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Modificación en el tipo de residuos"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#3DDB83" />
+</LinearLayout>
