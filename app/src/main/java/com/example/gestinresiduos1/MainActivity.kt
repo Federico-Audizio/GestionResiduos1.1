@@ -55,59 +55,55 @@ class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
-                    super.onCreate(savedInstanceState)
-                    setContentView(R.layout.activity_main)
+        
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-                    auth = FirebaseAuth.getInstance()
+        auth = FirebaseAuth.getInstance()
 
-                    // Asegúrate de que el usuario esté autenticado
-                    val user = auth.currentUser
-                    if (user != null) {
-                        val userEmail = user.email ?: return
+        // Asegúrate de que el usuario esté autenticado
+        val user = auth.currentUser
+        if (user != null) {
+            val userEmail = user.email ?: return
 
-                        barrioSpinner = findViewById(R.id.barrioSpinner)
-                        val guardarButton: Button = findViewById(R.id.guardarButton)
-                        sharedPreferences = getSharedPreferences("APP_PREFERENCES", Context.MODE_PRIVATE)
-                        database = FirebaseDatabase.getInstance().reference
+            barrioSpinner = findViewById(R.id.barrioSpinner)
+            val guardarButton: Button = findViewById(R.id.guardarButton)
+            sharedPreferences = getSharedPreferences("APP_PREFERENCES", Context.MODE_PRIVATE)
+            database = FirebaseDatabase.getInstance().reference
 
-                        // Configurar Spinner de barrios
-                        val barrios = servicio1.values.flatten() + servicio2.values.flatten()
-                        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, barrios)
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                        barrioSpinner.adapter = adapter
+            // Configurar Spinner de barrios
+            val barrios = servicio1.values.flatten() + servicio2.values.flatten()
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, barrios)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            barrioSpinner.adapter = adapter
 
-                        // Crear canal de notificación si es necesario (Android 8+)
-                        createNotificationChannel()
+            // Crear canal de notificación si es necesario (Android 8+)
+            createNotificationChannel()
 
-                        guardarButton.setOnClickListener {
-                            val barrioSeleccionado = barrioSpinner.selectedItem.toString()
-                            Log.d("MainActivity", "Botón Guardar presionado. Barrio seleccionado: $barrioSeleccionado")
+            guardarButton.setOnClickListener {
+                val barrioSeleccionado = barrioSpinner.selectedItem.toString()
+                Log.d("MainActivity", "Botón Guardar presionado. Barrio seleccionado: $barrioSeleccionado")
 
-                            // Guardar en Firestore con el correo como ID
-                            val db = FirebaseFirestore.getInstance()
-                            val usuarioData = hashMapOf("barrio" to barrioSeleccionado)
+                // Guardar en Firestore con el correo como ID
+                val db = FirebaseFirestore.getInstance()
+                val usuarioData = hashMapOf("barrio" to barrioSeleccionado)
 
-                            db.collection("usuarios").document(userEmail)
-                                .set(usuarioData) // Usa .set() para sobrescribir el documento si ya existe
-                                .addOnSuccessListener {
-                                    Toast.makeText(this, "Barrio guardado", Toast.LENGTH_SHORT).show()
-                                    Log.d("Firebase", "Barrio guardado con éxito en Firebase para el usuario $userEmail")
-                                    enviarNotificacionPrueba(barrioSeleccionado)
-                                    programarNotificacion(barrioSeleccionado)
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e("Firebase", "Error al guardar en Firebase", e)
-                                    Toast.makeText(this, "Error en el guardado", Toast.LENGTH_SHORT).show()
-                                }
-                        }
-                    } else {
-                        Toast.makeText(this, "Usuario no autenticado", Toast.LENGTH_SHORT).show()
-                        finish() // Finaliza la actividad si no hay usuario autenticado
+                db.collection("usuarios").document(userEmail)
+                    .set(usuarioData) // Usa .set() para sobrescribir el documento si ya existe
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Barrio guardado", Toast.LENGTH_SHORT).show()
+                        Log.d("Firebase", "Barrio guardado con éxito en Firebase para el usuario $userEmail")
+                        enviarNotificacionPrueba(barrioSeleccionado)
+                        programarNotificacion(barrioSeleccionado)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("Firebase", "Error al guardar en Firebase", e)
+                        Toast.makeText(this, "Error en el guardado", Toast.LENGTH_SHORT).show()
                     }
             }
+        } else {
+            Toast.makeText(this, "Usuario no autenticado", Toast.LENGTH_SHORT).show()
+            finish() // Finaliza la actividad si no hay usuario autenticado
         }
     }
 
