@@ -26,6 +26,7 @@ import java.util.Calendar
 import java.util.UUID
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import android.provider.Settings
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,31 +36,41 @@ class MainActivity : AppCompatActivity() {
     private val NOTIFICATION_PERMISSION_CODE = 1001
 
     private val servicio1 = mapOf(
-        "lunes" to listOf("Bº Roca", "Bº Cotolengo"),
-        "martes" to listOf("Bº Consolata", "Bº Chalet", "Bº 2 Hermanos", "Bº Roque Saenz Peña", "Bº Ciudad", "Bº 9 de Septiembre", "Bº Independencia"),
-        "miércoles" to listOf("Bº La Florida", "Bº Hospital", "Bº San Francisco", "Bº PARQUE", "Bº San Cayetano", "Bº Corradi"),
-        "jueves" to listOf("Bº Roca", "Bº Cotolengo"),
-        "viernes" to listOf("Bº Consolata", "Bº Chalet", "Bº 2 Hermanos", "Bº Roque Saenz Peña", "Bº Ciudad", "Bº 9 de Septiembre", "Bº Independencia"),
-        "sábado" to listOf("Bº La Florida", "Bº Hospital", "Bº San Francisco", "Bº PARQUE", "Bº San Cayetano", "Bº Corradi")
+        "lunes" to listOf("Roca", "Cotolengo"),
+        "martes" to listOf("Consolata", "Chalet", "2Hermanos", "RoqueSaenzPeña", "Ciudad", "9deSeptiembre", "Independencia"),
+        "miércoles" to listOf("LaFlorida", "Hospital", "SanFrancisco", "PARQUE", "SanCayetano", "Corradi"),
+        "jueves" to listOf("Roca", "Cotolengo"),
+        "viernes" to listOf("Consolata", "Chalet", "2Hermanos", "RoqueSaenzPeña", "Ciudad", "9deSeptiembre", "Independencia"),
+        "sábado" to listOf("LaFlorida", "Hospital", "SanFrancisco", "PARQUE", "SanCayetano", "Corradi")
     )
 
     private val servicio2 = mapOf(
-        "lunes" to listOf("Bº Catedral", "Bº Sarmiento"),
-        "martes" to listOf("Bº Iturraspe", "Bº Vélez Sarsfield", "Bº Hernández", "Bº San Carlos", "Bº 20 de Junio"),
-        "miércoles" to listOf("Bº La Milka", "Bº San Martin", "Bº Bouchard", "Bº Jardín"),
-        "jueves" to listOf("Bº Catedral", "Bº Sarmiento"),
-        "viernes" to listOf("Bº Iturraspe", "Bº Vélez Sarsfield", "Bº Hernández", "Bº San Carlos", "Bº 20 de Junio"),
-        "sábado" to listOf("Bº La Milka", "Bº San Martin", "Bº Bouchard", "Bº Jardín")
+        "lunes" to listOf("Catedral", "Sarmiento"),
+        "martes" to listOf("Iturraspe", "VélezSarsfield", "Hernández", "SanCarlos", "20deJunio"),
+        "miércoles" to listOf("LaMilka", "SanMartin", "Bouchard", "Jardín"),
+        "jueves" to listOf("Catedral", "Sarmiento"),
+        "viernes" to listOf("Iturraspe", "VélezSarsfield", "Hernández", "SanCarlos", "20deJunio"),
+        "sábado" to listOf("LaMilka", "SanMartin", "Bouchard", "Jardín")
     )
 
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                startActivity(intent)
+            }
+        }
+
+        // Crear canal de notificación si es necesario (Android 8+)
+        createNotificationChannel()
 
         // Asegúrate de que el usuario esté autenticado
         val user = auth.currentUser
@@ -77,9 +88,6 @@ class MainActivity : AppCompatActivity() {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             barrioSpinner.adapter = adapter
 
-            // Crear canal de notificación si es necesario (Android 8+)
-            createNotificationChannel()
-
             guardarButton.setOnClickListener {
                 val barrioSeleccionado = barrioSpinner.selectedItem.toString()
                 Log.d("MainActivity", "Botón Guardar presionado. Barrio seleccionado: $barrioSeleccionado")
@@ -89,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                 val usuarioData = hashMapOf("barrio" to barrioSeleccionado)
 
                 db.collection("usuarios").document(userEmail)
-                    .set(usuarioData) // Usa .set() para sobrescribir el documento si ya existe
+                    .set(usuarioData)
                     .addOnSuccessListener {
                         Toast.makeText(this, "Barrio guardado", Toast.LENGTH_SHORT).show()
                         Log.d("Firebase", "Barrio guardado con éxito en Firebase para el usuario $userEmail")
@@ -107,17 +115,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Crear canal de notificación
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "default",
-                "Notificaciones de Recolección",
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = "Canal para notificaciones de recolección de basura"
+            val name = "Canal de notificaciones de recolección de basura"
+            val descriptionText = "Notificaciones sobre el servicio de recolección de basura"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel("default", name, importance).apply {
+                description = descriptionText
             }
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(channel)
+            val notificationManager: NotificationManager =
+                getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -129,8 +138,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         val diasDeRecoleccion = servicio.filter { it.value.contains(barrio) }.keys
+
+        // Intentar suscribirse al tema de notificaciones
         FirebaseMessaging.getInstance().subscribeToTopic(barrio).addOnCompleteListener { task ->
             if (task.isSuccessful) {
+                Log.d("MainActivity", "Suscripción exitosa al tema de notificaciones: $barrio")
+                // Programar notificaciones para los días de recolección
                 for (dia in diasDeRecoleccion) {
                     val diaDeNotificacion = obtenerDiaDeSemana(dia)
                     if (diaDeNotificacion != null) {
@@ -138,10 +151,12 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } else {
+                Log.e("MainActivity", "Error en la suscripción a notificaciones")
                 Toast.makeText(this, "Error en la suscripción a notificaciones", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     private fun obtenerDiaDeSemana(dia: String): Int? {
         return when (dia.toLowerCase()) {
@@ -179,7 +194,6 @@ class MainActivity : AppCompatActivity() {
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
     }
 
-    // Este método se llama después de que el usuario responde a la solicitud de permiso
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -187,12 +201,10 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == 101) {
+        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permiso concedido, puedes proceder con las notificaciones
                 Toast.makeText(this, "Permiso de notificaciones concedido", Toast.LENGTH_SHORT).show()
             } else {
-                // Permiso denegado, muestra un mensaje o maneja el caso
                 Toast.makeText(this, "Permiso de notificaciones denegado", Toast.LENGTH_SHORT).show()
             }
         }
@@ -204,7 +216,6 @@ class MainActivity : AppCompatActivity() {
         }
         sendBroadcast(intent)
     }
-
 }
 
 
